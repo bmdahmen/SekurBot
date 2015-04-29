@@ -81,6 +81,7 @@ if __name__ == '__main__':
     socketlist = {cl.Connection._sock:'xmpp',sys.stdin:'stdio'}
     cl.sendInitPresence()
     myRoster =  cl.getRoster()
+    print("Roster: " + str(myRoster))
 
     #Register yourself so you can talk to your master... not necessary every time you run, but necessary the first time you run
     #Each side of the conversation needs to "friend" each other. Subscribe makes it so the bot "friend requests" you.
