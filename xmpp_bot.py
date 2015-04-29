@@ -32,19 +32,24 @@ class Bot:
                 message = event.getBody()
                 message_list = message.split(':')
                 type = str(message_list[0]).strip()
-                username = str(message_list[1]).strip()
 
                 print("type: " + str(type))
-                print("username: " + str(username))
 
                 if type.lower() == 's':
+                    username = str(message_list[1]).strip()
                     value = str(message_list[2]).strip()
+                    print("username: " + str(username))
                     print("value: " + str(value))
                     self.send(username, value)
                 elif type.lower() == 'r':
+                    username = str(message_list[1]).strip()
                     data = self.retrieve(username)
-                    print(data)
+                    print("username: " + str(username))
+                    print("Data retrieved: " + data)
                     self.stdio_message(data)
+                elif type.lower() == 'p':
+                    print("Presence check request")
+                    self.stdio_message('p')
 
     def stdio_message(self, message):
         #I believe this is for sending files over xmpp
@@ -81,7 +86,6 @@ if __name__ == '__main__':
     socketlist = {cl.Connection._sock:'xmpp',sys.stdin:'stdio'}
     cl.sendInitPresence()
     myRoster =  cl.getRoster()
-    print("Roster: " + str(myRoster))
 
     #Register yourself so you can talk to your master... not necessary every time you run, but necessary the first time you run
     #Each side of the conversation needs to "friend" each other. Subscribe makes it so the bot "friend requests" you.
