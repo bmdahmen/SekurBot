@@ -1,6 +1,7 @@
 from random import randint
 
-sharedPrime = 257
+sharedPrime = 196561 
+
 def splitSecret(inputNumber, splitParts, needed):
     #Generate the needed-1 coefficients
     coefs = (inputNumber,)
@@ -52,7 +53,7 @@ def joinSecret(shares):
     return accum
 
 # split the number 169 into 6 parts such that we only need 4 to reconstruct
-shares = splitSecret(169,6,4)
+shares = splitSecret(1693,6,1)
 print(shares)
-secret = joinSecret(shares[:4])
+secret = joinSecret(shares[:2])
 print(secret)
