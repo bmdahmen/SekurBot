@@ -5,12 +5,23 @@ import socket
 import subprocess
 from xmpp import *
 class Bot:
-    def __init__(self,jabber,remotejid):
+    def __init__(self,jabber,remotejid, masterjid):
         self.jabber = jabber
         self.remotejid = remotejid
+        self.masterjid = masterjid
 
     def register_handlers(self):
         self.jabber.RegisterHandler('message',self.xmpp_message)
+
+    def send(self, username, value):
+        with open('data/' + username + '.txt', 'w') as file:
+            file.write(value)
+
+    def retrieve(self, username):
+        with open('data/' + username + '.txt', 'r') as file:
+            data = file.read()
+
+        return data
 
     def xmpp_message(self, con, event):
         type = event.getType()
@@ -18,10 +29,26 @@ class Bot:
         if type in ['message', 'chat', None]:
             #here's where you recieve a message
             if event.getBody() is not None:
-                print(event.getBody()) 
+                message = event.getBody()
+                message_list = message.split(':')
+                type = str(message_list[0]).strip()
+                username = str(message_list[1]).strip()
+
+                print("type: " + str(type))
+                print("username: " + str(username))
+
+                if type.lower() == 's':
+                    value = str(message_list[2]).strip()
+                    print("value: " + str(value))
+                    self.send(username, value)
+                elif type.lower() == 'r':
+                    data = self.retrieve(username)
+                    print(data)
+                    self.stdio_message(data)
+
     def stdio_message(self, message):
         #I believe this is for sending files over xmpp
-        m = xmpp.protocol.Message(to=self.remotejid,body=message,typ='chat')
+        m = xmpp.protocol.Message(to=self.masterjid,body=message,typ='chat')
         self.jabber.send(m)
         pass
 
@@ -43,7 +70,10 @@ if __name__ == '__main__':
     jidparams={'jid': 'bot_dahmen2@54.191.94.255', 'password': 'WW1U3sZfe'}
     jid=xmpp.protocol.JID(jidparams['jid'])
     cl=xmpp.Client('54.191.94.255',debug=[])
-    bot=Bot(cl,'bot_dahmen2@54.191.94.255')
+
+    masterAccount = sys.argv[1]
+
+    bot=Bot(cl,'bot_dahmen2@54.191.94.255', masterAccount)
 
     if not bot.xmpp_connect():
         sys.stderr.write("Could not connect to server, or password mismatch!\n")
@@ -55,7 +85,7 @@ if __name__ == '__main__':
     #Register yourself so you can talk to your master... not necessary every time you run, but necessary the first time you run
     #Each side of the conversation needs to "friend" each other. Subscribe makes it so the bot "friend requests" you.
     #Authorize makes it so the Bot "accepts your friend request"
-    masterAccount = sys.argv[1]
+
     online = 1
     auth=False
     while online:

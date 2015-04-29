@@ -1,0 +1,1 @@
+This directory is where the bot will store data it receives from "s:..." commands
