@@ -29,7 +29,7 @@ class Bot:
         print('in iq handler')
         reply=iq_node.buildReply('result')
         # ... put some content into reply node
-        #reply.addNode()
+        reply.addChild(name="data", namespace=xmpp.NS_DATA, payload=['p'])
         conn.send(reply)
         raise xmpp.NodeProcessed  # This stanza is fully processed
 
