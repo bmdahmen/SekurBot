@@ -12,6 +12,7 @@ class Bot:
 
     def register_handlers(self):
         self.jabber.RegisterHandler('message',self.xmpp_message)
+        self.jabber.RegisterHandler('iq', self.iqHandler)
 
     def send(self, username, value):
         with open('data/' + username + '.txt', 'w') as file:
@@ -23,10 +24,20 @@ class Bot:
 
         return data
 
+    def iqHandler(self, conn,iq_node):
+        """ Handler for processing some "get" query from custom namespace"""
+        print('in iq handler')
+        reply=iq_node.buildReply('result')
+        # ... put some content into reply node
+        reply.addNode()
+        conn.send(reply)
+        raise xmpp.NodeProcessed  # This stanza is fully processed
+
     def xmpp_message(self, con, event):
         type = event.getType()
         fromjid = event.getFrom().getStripped()
-        if type in ['message', 'chat', None]:
+        print(type)
+        if type in ['message', 'chat', 'get', 'iq', None]:
             #here's where you recieve a message
             if event.getBody() is not None:
                 message = event.getBody()
@@ -46,15 +57,18 @@ class Bot:
                     data = self.retrieve(username)
                     print("username: " + str(username))
                     print("Data retrieved: " + data)
-                    self.stdio_message(data)
+                    self.stdio_message(con, event, data)
                 elif type.lower() == 'p':
                     print("Presence check request")
-                    self.stdio_message('p')
+                    self.stdio_message(con, event, 'p')
 
-    def stdio_message(self, message):
+    def stdio_message(self, con, event, message):
         #I believe this is for sending files over xmpp
-        m = xmpp.protocol.Message(to=self.masterjid,body=message,typ='chat')
+        #m = xmpp.protocol.Message(to=self.masterjid,body=message,typ='chat')
+        m = event.buildReply('result')
+        print(str(m))
         self.jabber.send(m)
+        raise xmpp.NodeProcessed
         pass
 
     def xmpp_connect(self):
@@ -63,7 +77,7 @@ class Bot:
             sys.stderr.write('could not connect!\n')
             return False
         sys.stderr.write('connected with %s\n'%con)
-        auth=self.jabber.auth(jid.getNode(),jidparams['password'],resource='crappy_script')
+        auth=self.jabber.auth(jid.getNode(),jidparams['password'], resource='test')
         if not auth:
             sys.stderr.write('could not authenticate!\n')
             return False
@@ -72,13 +86,13 @@ class Bot:
         return con
 
 if __name__ == '__main__':
-    jidparams={'jid': 'bot_dahmen2@54.191.94.255', 'password': 'WW1U3sZfe'}
+    jidparams={'jid': 'bot_akkowal2@54.191.94.255', 'password': 'yVZHWuRmV'}
     jid=xmpp.protocol.JID(jidparams['jid'])
     cl=xmpp.Client('54.191.94.255',debug=[])
 
     masterAccount = sys.argv[1]
 
-    bot=Bot(cl,'bot_dahmen2@54.191.94.255', masterAccount)
+    bot=Bot(cl,'bot_akkowal2@54.191.94.255', masterAccount)
 
     if not bot.xmpp_connect():
         sys.stderr.write("Could not connect to server, or password mismatch!\n")
