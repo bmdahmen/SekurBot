@@ -10,8 +10,8 @@ cf.read('CONFIG')
 server_ip = str(cf.get("Server","server_ip"))
 server_port = str(cf.get("Server","server_port"))
 master_jid = str(cf.get("Master","jid"))
-bot1_jid = str(cf.get("Master","jid"))
-bot1_pass = str(cf.get("Master","password"))
+bot1_jid = str(cf.get("bot1_jib","jid"))
+bot1_pass = str(cf.get("bot1_jib","password"))
 
 class Bot:
     def __init__(self,jabber,remotejid, masterjid):
