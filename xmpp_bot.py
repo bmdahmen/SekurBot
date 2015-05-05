@@ -97,7 +97,6 @@ if __name__ == '__main__':
     cl=xmpp.Client(server_ip,debug=[])
 
     bot=Bot(cl,bot1_jid, master_jid)
-
     if not bot.xmpp_connect():
         sys.stderr.write("Could not connect to server, or password mismatch!\n")
         sys.exit(1)
