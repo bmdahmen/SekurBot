@@ -1,9 +1,18 @@
 #!/usr/bin/python2
 import re
 import sys,os,xmpp,time,select, socket
-import socket
-import subprocess
+import socket, subprocess
+import ConfigParser
 from xmpp import *
+
+cf = ConfigParser.ConfigParser()
+cf.read('CONFIG')
+server_ip = str(cf.get("Server","server_ip"))
+server_port = str(cf.get("Server","server_port"))
+master_jid = str(cf.get("Master","jid"))
+bot1_jid = str(cf.get("Master","jid"))
+bot1_pass = str(cf.get("Master","password"))
+
 class Bot:
     def __init__(self,jabber,remotejid, masterjid):
         self.jabber = jabber
@@ -21,7 +30,6 @@ class Bot:
     def retrieve(self, username):
         with open('data/' + username + '.txt', 'r') as file:
             data = file.read()
-
         return data
 
     def iqHandler(self, conn,iq_node):
@@ -43,9 +51,7 @@ class Bot:
                 message = event.getBody()
                 message_list = message.split(':')
                 type = str(message_list[0]).strip()
-
                 print("type: " + str(type))
-
                 if type.lower() == 's':
                     username = str(message_list[1]).strip()
                     value = str(message_list[2]).strip()
@@ -72,7 +78,7 @@ class Bot:
         pass
 
     def xmpp_connect(self):
-        con=self.jabber.connect(server=('54.191.94.255','5222'))
+        con=self.jabber.connect(server=(server_ip,server_port))
         if not con:
             sys.stderr.write('could not connect!\n')
             return False
@@ -86,13 +92,11 @@ class Bot:
         return con
 
 if __name__ == '__main__':
-    jidparams={'jid': 'bot_akkowal2@54.191.94.255', 'password': 'yVZHWuRmV'}
+    jidparams={'jid': bot1_jid, 'password': bot1_pass}
     jid=xmpp.protocol.JID(jidparams['jid'])
-    cl=xmpp.Client('54.191.94.255',debug=[])
+    cl=xmpp.Client(server_ip,debug=[])
 
-    masterAccount = sys.argv[1]
-
-    bot=Bot(cl,'bot_akkowal2@54.191.94.255', masterAccount)
+    bot=Bot(cl,bot1_jid, master_jid)
 
     if not bot.xmpp_connect():
         sys.stderr.write("Could not connect to server, or password mismatch!\n")
@@ -100,17 +104,15 @@ if __name__ == '__main__':
     socketlist = {cl.Connection._sock:'xmpp',sys.stdin:'stdio'}
     cl.sendInitPresence()
     myRoster =  cl.getRoster()
-
     #Register yourself so you can talk to your master... not necessary every time you run, but necessary the first time you run
     #Each side of the conversation needs to "friend" each other. Subscribe makes it so the bot "friend requests" you.
     #Authorize makes it so the Bot "accepts your friend request"
-
     online = 1
     auth=False
     while online:
         (i , o, e) = select.select(socketlist.keys(),[],[],1)
         if(auth is False):
-            thing = myRoster.Authorize(masterAccount)
+            thing = myRoster.Authorize(master_jid)
         for each in i:
             if socketlist[each] == 'xmpp':
                 cl.Process(1)

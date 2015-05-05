@@ -1,6 +1,13 @@
 import xmpp
 import sys
+import ConfigParser
 
+cf = ConfigParser.ConfigParser()
+cf.read('CONFIG')
+server_ip = str(cf.get("Server","server_ip"))
+server_port = str(cf.get("Server","server_port"))
+master_jid = str(cf.get("Master","jid"))
+master_pass = str(cf.get("Master","password"))
 
 class Master:
     def __init__(self, client, my_jid):
@@ -10,7 +17,8 @@ class Master:
         self.get_bot_jids()
 
     def xmpp_connect(self):
-        con=self.jabber.connect(server=('54.191.94.255','5222'))
+        port = str(cf.get("Server", "server_port"))
+        con=self.jabber.connect(server=(server_ip,server_port))
         if not con:
             sys.stderr.write('could not connect!\n')
             return False
@@ -59,10 +67,9 @@ class Master:
 
 
 if __name__ == '__main__':
-    jidparams={'jid': 'akkowal2@54.191.94.255', 'password': 'Ewo13IWEr'}
+    jidparams={'jid': master_jid, 'password': master_pass}
     jid=xmpp.protocol.JID(jidparams['jid'])
-    cl=xmpp.Client('54.191.94.255',debug=[])
-
+    cl=xmpp.Client(server_ip,debug=[])
     master = Master(cl, jid)
     master.check_bot_prescence()
 
