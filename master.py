@@ -17,7 +17,6 @@ class Master:
         self.get_bot_jids()
 
     def xmpp_connect(self):
-        port = str(cf.get("Server", "server_port"))
         con=self.jabber.connect(server=(server_ip,server_port))
         if not con:
             sys.stderr.write('could not connect!\n')
@@ -56,15 +55,24 @@ class Master:
         pass
 
     def check_bot_prescence(self):
+        botCount = 0
         for peer in self.bot_jids:
             if 'bot' in peer:
                 print("Checking prescence for: " + str(peer))
                 #mess = xmpp.protocol.Message(to=peer,body="p:p",typ='chat')
                 m = xmpp.protocol.Iq(typ='get', to=peer + '/test', frm=self.my_jid, xmlns="jabber:client")
                 m.setQueryNS(xmpp.NS_VERSION)
-                reply = self.jabber.SendAndWaitForResponse(m)
-                print(str(reply))
-
+                reply = self.jabber.SendAndWaitForResponse(m,timeout=2)
+                if(reply is not None):
+                    resp=None
+                    try:
+                        resp = reply.getPayload()[1].data[0]
+                    except:
+                        print("Couldn't reach bot, maybe credential error")
+                        continue
+                    if resp=='p':
+                        botCount+=1
+        return botCount                        
 
 if __name__ == '__main__':
     jidparams={'jid': master_jid, 'password': master_pass}
