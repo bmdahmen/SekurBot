@@ -46,7 +46,15 @@ def retrieve_secret(username, the_master):
     (botcount, bots) = the_master.check_bot_prescence()
     print the_master.retrieve_secret(username, botcount, bots)
 
-def process_command(command, the_master):
+def init():
+    jidparams={'jid': master_jid, 'password': master_pass}
+    jid=xmpp.protocol.JID(jidparams['jid'])
+    cl=xmpp.Client(server_ip,debug=[])
+    master_bot = master.Master(cl, jid, server_ip, server_port, jidparams, jid)
+    return master_bot
+     
+
+def process_command(command):
     """ Process a command-line command and execute the 
         resulting SekurBot action
         :param command: The command to be executed, as a sys arg array
@@ -62,20 +70,18 @@ def process_command(command, the_master):
             print_help()
     elif command == 'sharesecret':
         if (len(sys.argv) == 5):
-            share_secret(sys.argv[2], sys.argv[3], sys.argv[4], the_master)
+            master = init()
+            share_secret(sys.argv[2], sys.argv[3], sys.argv[4], master)
         else:
             print_help()
     elif command == 'retrievesecret':
         if (len(sys.argv)==3):
-            retrieve_secret(sys.argv[2], the_master)
+            master = init()
+            retrieve_secret(sys.argv[2], master)
         else:
             print_help()
     else:
         print_help()
 
 if __name__ == '__main__':
-    jidparams={'jid': master_jid, 'password': master_pass}
-    jid=xmpp.protocol.JID(jidparams['jid'])
-    cl=xmpp.Client(server_ip,debug=[])
-    master_bot = master.Master(cl, jid, server_ip, server_port, jidparams, jid)
-    process_command(sys.argv, master_bot)
+   process_command(sys.argv)

@@ -1,6 +1,10 @@
 from random import randint
+import ConfigParser
 
-sharedPrime = 196561 
+cf = ConfigParser.ConfigParser()
+cf.read('CONFIG')
+sharedPrime = int(cf.get("Shamir","sharedPrime"))
+
 
 def splitSecret(inputNumber, splitParts, needed):
     #Generate the needed-1 coefficients
@@ -51,9 +55,3 @@ def joinSecret(shares):
         value = shares[formula][1]
         accum = (sharedPrime + accum + (value * numerator * modInverse(denominator))) % sharedPrime
     return accum
-
-# split the number 169 into 6 parts such that we only need 4 to reconstruct
-shares = splitSecret(1693,6,1)
-print(shares)
-secret = joinSecret(shares[:2])
-print(secret)
