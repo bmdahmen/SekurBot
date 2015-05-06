@@ -118,6 +118,7 @@ class Master:
         k = 1
         for num in numbers:
             numbers_as_tuples.append((k, int(num)))
+            k+=1
         secret = shamir.joinSecret(numbers_as_tuples)
         return secret
 
