@@ -4,21 +4,22 @@ import ConfigParser
 import shamir
 import time
 
-cf = ConfigParser.ConfigParser()
-cf.read('CONFIG')
-server_ip = str(cf.get("Server","server_ip"))
-server_port = str(cf.get("Server","server_port"))
-master_jid = str(cf.get("Master","jid"))
-master_pass = str(cf.get("Master","password"))
+# cf = ConfigParser.ConfigParser()
+# cf.read('CONFIG')
+# server_ip = str(cf.get("Server","server_ip"))
+# server_port = str(cf.get("Server","server_port"))
+# master_jid = str(cf.get("Master","jid"))
+# master_pass = str(cf.get("Master","password"))
 
 class Master:
-    def __init__(self, client, my_jid):
+    def __init__(self, client, my_jid, server_ip, server_port, jidparams, jid):
         self.my_jid = my_jid
         self.jabber = client
-        self.xmpp_connect()
+        self.xmpp_connect(server_ip, server_port, jidparams, jid)
+        self.bot_jids = None
         self.get_bot_jids()
 
-    def xmpp_connect(self):
+    def xmpp_connect(self, server_ip, server_port, jidparams, jid):
         con=self.jabber.connect(server=(server_ip,server_port))
         if not con:
             sys.stderr.write('could not connect!\n')
@@ -119,16 +120,17 @@ class Master:
         for num in numbers:
             numbers_as_tuples.append((k, int(num)))
             k+=1
+        print numbers_as_tuples
         secret = shamir.joinSecret(numbers_as_tuples)
         return secret
 
-if __name__ == '__main__':
-    jidparams={'jid': master_jid, 'password': master_pass}
-    jid=xmpp.protocol.JID(jidparams['jid'])
-    cl=xmpp.Client(server_ip,debug=[])
-    master = Master(cl, jid)
-    (botcount, bots) = master.check_bot_prescence()
-    master.share_secret(13237, 5, botcount, bots, 'testname2')
-    time.sleep(2)
-    print master.retrieve_secret('testname2', botcount, bots)
+# if __name__ == '__main__':
+#     jidparams={'jid': master_jid, 'password': master_pass}
+#     jid=xmpp.protocol.JID(jidparams['jid'])
+#     cl=xmpp.Client(server_ip,debug=[])
+#     master = Master(cl, jid)
+#     (botcount, bots) = master.check_bot_prescence()
+#     master.share_secret(13237, 5, botcount, bots, 'testname2')
+#     time.sleep(2)
+#     print master.retrieve_secret('testname2', botcount, bots)
 
