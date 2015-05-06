@@ -1,6 +1,8 @@
 import xmpp
 import sys
 import ConfigParser
+import shamir
+import time
 
 cf = ConfigParser.ConfigParser()
 cf.read('CONFIG')
@@ -56,6 +58,7 @@ class Master:
 
     def check_bot_prescence(self):
         botCount = 0
+        bots = []
         for peer in self.bot_jids:
             if 'bot' in peer:
                 print("Checking prescence for: " + str(peer))
@@ -71,13 +74,60 @@ class Master:
                         print("Couldn't reach bot, maybe credential error")
                         continue
                     if resp=='p':
+                        bots.append(peer)
                         botCount+=1
-        return botCount                        
+        return botCount, bots
+
+    def share_secret(self, number, parts, parts_needed, the_bots, username):
+        shares = shamir.splitSecret(number, parts, parts_needed)
+        print shares
+        #print shares[0][1]
+        i = 0
+        for peer in the_bots:
+            m = xmpp.protocol.Iq(typ='get', to=peer + '/test', frm=self.my_jid, xmlns="jabber:client", payload="s:"+str(shares[i][1])+":u:"+username)
+            i+=1
+            m.setQueryNS(xmpp.NS_VERSION)
+            reply = self.jabber.SendAndWaitForResponse(m, timeout=2)
+            if(reply is not None):
+                resp=None
+                try:
+                    resp = reply.getPayload()[1].data[0]
+                except:
+                    print "error with the bot"
+                    continue
+                if resp=='s':
+                    print "it was shared"
+
+    def retrieve_secret(self, username, the_botcount, the_bots):
+        i = 0
+        numbers = []
+        for peer in the_bots:
+            m = xmpp.protocol.Iq(typ='get', to=peer + '/test', frm=self.my_jid, xmlns="jabber:client", payload="u:"+username)
+            i+=1
+            m.setQueryNS(xmpp.NS_VERSION)
+            reply = self.jabber.SendAndWaitForResponse(m, timeout=2)
+            if(reply is not None):
+                resp=None
+                try:
+                    resp = reply.getPayload()[1].data[0]
+                except:
+                    print "error with the bot"
+                    continue
+                numbers.append(resp)
+        numbers_as_tuples = []
+        k = 1
+        for num in numbers:
+            numbers_as_tuples.append((k, int(num)))
+        secret = shamir.joinSecret(numbers_as_tuples)
+        return secret
 
 if __name__ == '__main__':
     jidparams={'jid': master_jid, 'password': master_pass}
     jid=xmpp.protocol.JID(jidparams['jid'])
     cl=xmpp.Client(server_ip,debug=[])
     master = Master(cl, jid)
-    master.check_bot_prescence()
+    (botcount, bots) = master.check_bot_prescence()
+    master.share_secret(13237, 5, botcount, bots, 'testname2')
+    time.sleep(2)
+    print master.retrieve_secret('testname2', botcount, bots)
 

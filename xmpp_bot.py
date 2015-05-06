@@ -36,8 +36,28 @@ class Bot:
         """ Handler for processing some "get" query from custom namespace"""
         print('in iq handler')
         reply=iq_node.buildReply('result')
+        cmd = iq_node.getQueryPayload()
+        print cmd
         # ... put some content into reply node
-        reply.addChild(name="data", namespace=xmpp.NS_DATA, payload=['p'])
+        if not cmd:
+            reply.addChild(name="data", namespace=xmpp.NS_DATA, payload=['p'])
+        #getting around the list of nodes that the bot receives as the first message
+        #shit workaround
+        elif len(cmd) > 2:
+            reply.addChild(name="data", namespace=xmpp.NS_DATA, payload=['p'])
+        else:
+            number_split = cmd[0].split(':')
+            print number_split[0]
+            if str(number_split[0]) == 's':
+                number = number_split[1].strip()
+                username = number_split[3].strip()
+                self.send(username, number)
+                reply.addChild(name="data", namespace=xmpp.NS_DATA, payload=['s'])
+            else:
+                username = number_split[1].strip()
+                number = self.retrieve(username)
+                reply.addChild(name="data", namespace=xmpp.NS_DATA, payload=number)
+
         conn.send(reply)
         raise xmpp.NodeProcessed  # This stanza is fully processed
 
