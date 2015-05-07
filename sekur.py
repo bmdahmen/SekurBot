@@ -60,12 +60,13 @@ def share_secret(username, file_path, master):
     print(len(a))
     for orig_num in raw_bin_nums:
         splitList =shamir.splitSecret(orig_num, botcount,int(k))
+        print(splitList)
         count = 0
         for nums in splitList:
             a[count] = a[count] + ","+ str(nums[1])        
             count+=1
     print("bots:  " + str(online_bots))
-    master.share_secret("bm",a,online_bots)
+    master.share_secret(username,a,online_bots)
 
 
 def retrieve_secret(username, the_master):

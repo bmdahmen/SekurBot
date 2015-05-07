@@ -3,6 +3,7 @@ import sys
 import ConfigParser
 import shamir
 import time
+import file_controller
 
 # cf = ConfigParser.ConfigParser()
 # cf.read('CONFIG')
@@ -83,7 +84,8 @@ class Master:
         print(payload)
         i = 0
         for peer in online_bots:
-            m = xmpp.protocol.Iq(typ='get', to=peer + '/test', frm=self.my_jid, xmlns="jabber:client", payload=payload)
+            print(num_array[i])
+            m = xmpp.protocol.Iq(typ='get', to=peer + '/test', frm=self.my_jid, xmlns="jabber:client", payload="s:"+str(num_array[i])+":u:"+username)
             i+=1
             m.setQueryNS(xmpp.NS_VERSION)
             print(m)
@@ -101,6 +103,8 @@ class Master:
     def retrieve_secret(self, username, the_botcount, the_bots):
         i = 0
         numbers = []
+        values = []
+        magic_numbers = []
         for peer in the_bots:
             m = xmpp.protocol.Iq(typ='get', to=peer + '/test', frm=self.my_jid, xmlns="jabber:client", payload="u:"+username)
             i+=1
@@ -113,15 +117,34 @@ class Master:
                 except:
                     print "error with the bot"
                     continue
-                numbers.append(resp)
-        numbers_as_tuples = []
+
+                resp_list = resp.split(",")
+                resp_list = resp_list[1:]
+                print(str(resp_list))
+                if values == []:
+                    for num in resp_list:
+                        values.append([int(num)])
+                else:
+                    x = 0
+                    for num in resp_list:
+                        values[x].append(int(num))
+                        x += 1
+                    #numbers.append(resp)
+
+        print(str(values))
+
         k = 1
-        for num in numbers:
-            numbers_as_tuples.append((k, int(num)))
-            k+=1
-        print numbers_as_tuples
-        secret = shamir.joinSecret(numbers_as_tuples)
-        return secret
+        for parts in values:
+            numbers_as_tuples = []
+            for part in parts:
+                numbers_as_tuples.append((k, int(part)))
+            magic_numbers.append(shamir.joinSecret(numbers_as_tuples))
+            k += 1
+
+        #print numbers_as_tuples
+        #secret = shamir.joinSecret(numbers_as_tuples)
+        file_controller.get_file(magic_numbers)
+        return magic_numbers
 
 # if __name__ == '__main__':
 #     jidparams={'jid': master_jid, 'password': master_pass}
