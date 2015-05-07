@@ -63,4 +63,7 @@ and change the listed line (line: 96) to
 
 This should fix the problem (if you can figure out what 'fancy' is doing here, I'd love to hear about it. Had little luck contacting xmppy team)  
 
-
+# Contributors
+Brian Dahmen - dahmen2
+Andrew Kowalski  - akkowal2
+Dan Zebrowski - dzebro2
