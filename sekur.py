@@ -39,7 +39,8 @@ def print_command_help(command):
 def share_secret(username, secret, k, the_master):
     print("Sharing is caring")
     (botcount, bots) = the_master.check_bot_prescence()
-    the_master.share_secret(int(secret), int(k), botcount, bots, username)
+    print(botcount)
+    #the_master.share_secret(int(secret), int(k), botcount, bots, username)
 
 def retrieve_secret(username, the_master):
     print("go get it son")

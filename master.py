@@ -24,12 +24,10 @@ class Master:
         if not con:
             sys.stderr.write('could not connect!\n')
             return False
-        sys.stderr.write('connected with %s\n'%con)
         auth=self.jabber.auth(jid.getNode(),jidparams['password'])
         if not auth:
             sys.stderr.write('could not authenticate!\n')
             return False
-        sys.stderr.write('authenticated using %s\n'%auth)
         self.register_handlers()
         return con
 
@@ -81,7 +79,7 @@ class Master:
 
     def share_secret(self, number, parts, parts_needed, the_bots, username):
         shares = shamir.splitSecret(number, parts, parts_needed)
-        print shares
+        print("Shares " + str(shares))
         #print shares[0][1]
         i = 0
         for peer in the_bots:
