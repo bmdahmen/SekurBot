@@ -19,6 +19,7 @@ def split_file(file_path, num_bits=16):
             break
     secret_numbers = [int(x, 2) for x in bin_strings]
     secret_numbers.append(special_num)
+    print("SPECIAL NUMBERS: " + str(secret_numbers))
     return secret_numbers
 
 
@@ -45,7 +46,7 @@ def get_file(secret_numbers, num_bits=16):
     n = int('0b' + bin_string, 2)
     file_contents = binascii.unhexlify('%x' % n)
     print(file_contents)
-    with open("data/test.txt", 'w') as f:
+    with open("data/WEGOTSDAFILEGUYS.txt", 'w') as f:
         f.write(file_contents)
 
 if __name__ == '__main__':

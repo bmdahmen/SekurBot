@@ -133,14 +133,16 @@ class Master:
 
         print(str(values))
 
-        k = 1
         for parts in values:
+            k = 1
             numbers_as_tuples = []
             for part in parts:
                 numbers_as_tuples.append((k, int(part)))
+                k += 1
             magic_numbers.append(shamir.joinSecret(numbers_as_tuples))
-            k += 1
+            #k += 1
 
+        print("SUPER SPECIAL NUMBERS: " + str(magic_numbers))
         #print numbers_as_tuples
         #secret = shamir.joinSecret(numbers_as_tuples)
         file_controller.get_file(magic_numbers)
