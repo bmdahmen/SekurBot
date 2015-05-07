@@ -1,5 +1,5 @@
 # SekurBot
-SekurBot is a botnet framework that allows a master to store files on a bot-network, such that no bot has the original file, and not neccesarily every bot is neccesary in order to retrieve the file. To accomplish this feat, SekurBot utilizes a cryptographic algorithm known as [Shamir's Secret Sharing ](http://en.wikipedia.org/wiki/Shamir%27s_Secret_Sharing), where a secret (in the form of a number) is divided into parts, giving each participant its own unique part(number), where some of or all of the parts are needed to reconstruct the secret.  
+SekurBot is a botnet framework that allows a master to store files on a bot-network, such that no bot has the original file, and not every bot is neccesary in order to retrieve the file. To accomplish this feat, SekurBot utilizes a cryptographic algorithm known as [Shamir's Secret Sharing ](http://en.wikipedia.org/wiki/Shamir%27s_Secret_Sharing), where a secret (in the form of a number) is divided into parts, giving each participant its own unique part(number), where some of or all of the parts are needed to reconstruct the secret.  
 
 For example, if I would input the number 169 to Shamir's Algorithm requesting to split the number 6 ways such that only 4 are neccesary to recreate the number, Shamir might return the following 6 numbers:  
 shamer_split(num=169,split=6,retrieve_num=4) = [153,3852,1502,45,295,2456]  
@@ -7,7 +7,7 @@ shamer_split(num=169,split=6,retrieve_num=4) = [153,3852,1502,45,295,2456]
 Later, in order to retrieve the number 169, Shamir only requires any combination of 4  out of the original six numbers:   
 shamir_retrieve([1502,45,295,2456]) = 169  
 shamir_retrieve([153,3852,2456,295]) = 169  
-shamir_retrieve([45,2456,156,1502]) = 169  
+shamir_retrieve([45,2456,153,1502]) = 169  
 
 # Applications
 In order to extend this secret sharing beyond simply sharing numbers, we have decomposed files (16 bits at a time) into a stream numbers between 0 and (2^16) representing their binary value. We then pass this stream of numbers into shamir's splitting function one number at a time. Every bot that was online at the time of the request to share the file, gets their own unique number stream to store on disk along with a key to associate with that number stream (the file name). Since we do not require all of the number streams in order to recreate the original file (in the above example we only require 4/6), we do not require all the original bots to respond in order for us to recreate to file.  
