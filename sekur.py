@@ -2,8 +2,9 @@
 import sys, datetime, uuid
 import ConfigParser
 import xmpp
-import master
-
+import master, shamir
+import file_controller as fc
+import numpy as np
 cf = ConfigParser.ConfigParser()
 cf.read('CONFIG')
 master_jid = str(cf.get("Master","jid"))
@@ -36,15 +37,45 @@ def print_command_help(command):
         print ("Unknown command!")
         print_help()
 
-def share_secret(username, secret, k, the_master):
-    print("Sharing is caring")
-    (botcount, bots) = the_master.check_bot_prescence()
-    print(botcount)
+def collect_k(botcount):
+    print("You have " + str(botcount)  + " bots online.")
+    mesg ="How many bots do you want to require to recreate your file?\n"
+    mesg += "Note: must be less than or equal to "+str(botcount) +'\n'  
+    inp = raw_input(mesg)
+    return inp
+
+
+def share_secret(username, file_path, master):
+    raw_bin_nums = fc.split_file(file_path)
+    print(raw_bin_nums)
+    (botcount, bots) = master.check_bot_prescence()
+    print(bots)
+    if(botcount==0):
+        print("You do not have any bots online. Run ./xmpp_bot.py on your bot's pc with their info")
+        print("Under the Slave section of the config")
+        return
+    k = collect_k(botcount)
+    a=[]
+    for bots in range(botcount):
+        a.append("")
+    print(len(a))
+    for orig_num in raw_bin_nums:
+        splitList =shamir.splitSecret(orig_num, botcount,int(k))
+        count = 0
+        for nums in splitList:
+            a[count] = a[count] + ","+ str(nums[1])        
+            count+=1
+    master.share_secret("bm",a)
+
+        
+
+
     #the_master.share_secret(int(secret), int(k), botcount, bots, username)
 
 def retrieve_secret(username, the_master):
     print("go get it son")
     (botcount, bots) = the_master.check_bot_prescence()
+
     print the_master.retrieve_secret(username, botcount, bots)
 
 def init():
@@ -70,9 +101,10 @@ def process_command(command):
         else:
             print_help()
     elif command == 'sharesecret':
-        if (len(sys.argv) == 5):
+        if (len(sys.argv) == 4):
             master = init()
-            share_secret(sys.argv[2], sys.argv[3], sys.argv[4], master)
+            print(sys.argv[1])
+            share_secret(sys.argv[2], sys.argv[3], master)
         else:
             print_help()
     elif command == 'retrievesecret':

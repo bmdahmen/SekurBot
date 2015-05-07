@@ -77,15 +77,16 @@ class Master:
                         botCount+=1
         return botCount, bots
 
-    def share_secret(self, number, parts, parts_needed, the_bots, username):
-        shares = shamir.splitSecret(number, parts, parts_needed)
-        print("Shares " + str(shares))
+    def share_secret(self, username, num_array):
         #print shares[0][1]
+        payload="s:"+str(num_array[0])+":u:"+username
+        print(payload)
         i = 0
-        for peer in the_bots:
-            m = xmpp.protocol.Iq(typ='get', to=peer + '/test', frm=self.my_jid, xmlns="jabber:client", payload="s:"+str(shares[i][1])+":u:"+username)
+        for peer in self.bot_jids:
+            m = xmpp.protocol.Iq(typ='get', to=peer + '/test', frm=self.my_jid, xmlns="jabber:client", payload="s:"+"q"+":u:"+username)
             i+=1
             m.setQueryNS(xmpp.NS_VERSION)
+            print(m)
             reply = self.jabber.SendAndWaitForResponse(m, timeout=2)
             if(reply is not None):
                 resp=None
