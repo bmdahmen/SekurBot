@@ -48,8 +48,7 @@ def collect_k(botcount):
 def share_secret(username, file_path, master):
     raw_bin_nums = fc.split_file(file_path)
     print(raw_bin_nums)
-    (botcount, bots) = master.check_bot_prescence()
-    print(bots)
+    (botcount, online_bots) = master.check_bot_prescence()
     if(botcount==0):
         print("You do not have any bots online. Run ./xmpp_bot.py on your bot's pc with their info")
         print("Under the Slave section of the config")
@@ -65,18 +64,14 @@ def share_secret(username, file_path, master):
         for nums in splitList:
             a[count] = a[count] + ","+ str(nums[1])        
             count+=1
-    master.share_secret("bm",a)
+    print("bots:  " + str(online_bots))
+    master.share_secret("bm",a,online_bots)
 
-        
-
-
-    #the_master.share_secret(int(secret), int(k), botcount, bots, username)
 
 def retrieve_secret(username, the_master):
     print("go get it son")
-    (botcount, bots) = the_master.check_bot_prescence()
-
-    print the_master.retrieve_secret(username, botcount, bots)
+    (botcount, online_bots) = the_master.check_bot_prescence()
+    print the_master.retrieve_secret(username, botcount, online_bots)
 
 def init():
     jidparams={'jid': master_jid, 'password': master_pass}
@@ -118,3 +113,4 @@ def process_command(command):
 
 if __name__ == '__main__':
    process_command(sys.argv)
+ 

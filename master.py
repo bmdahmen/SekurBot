@@ -77,13 +77,13 @@ class Master:
                         botCount+=1
         return botCount, bots
 
-    def share_secret(self, username, num_array):
+    def share_secret(self, username, num_array, online_bots):
         #print shares[0][1]
         payload="s:"+str(num_array[0])+":u:"+username
         print(payload)
         i = 0
-        for peer in self.bot_jids:
-            m = xmpp.protocol.Iq(typ='get', to=peer + '/test', frm=self.my_jid, xmlns="jabber:client", payload="s:"+"q"+":u:"+username)
+        for peer in online_bots:
+            m = xmpp.protocol.Iq(typ='get', to=peer + '/test', frm=self.my_jid, xmlns="jabber:client", payload=payload)
             i+=1
             m.setQueryNS(xmpp.NS_VERSION)
             print(m)
