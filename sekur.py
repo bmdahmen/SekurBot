@@ -17,8 +17,8 @@ def print_help():
     print ("Usage: ./sekur [command]")
     print ("./sekur help [command name] - display extended command information.\n")
     print ("Available commands:")
-    print ("\tsharesecret [username] [secret] [k]")
-    print ("\tretrievesecret [username]")
+    print ("\t sharefile [filepath/filename]")
+    print ("\t getfile [filename]")
 
 def print_command_help(command):
     """ Display extended help information for CLI command
@@ -37,42 +37,39 @@ def print_command_help(command):
         print ("Unknown command!")
         print_help()
 
-def collect_k(botcount):
+def collect_k(botcount, online_bots):
     print("You have " + str(botcount)  + " bots online.")
+    for bots in online_bots:
+        print(str(bots) + " was online")
     mesg ="How many bots do you want to require to recreate your file?\n"
     mesg += "Note: must be less than or equal to "+str(botcount) +'\n'  
     inp = raw_input(mesg)
     return inp
 
 
-def share_secret(username, file_path, master):
+def share_file(file_path, master):
     raw_bin_nums = fc.split_file(file_path)
-    print(raw_bin_nums)
     (botcount, online_bots) = master.check_bot_prescence()
     if(botcount==0):
         print("You do not have any bots online. Run ./xmpp_bot.py on your bot's pc with their info")
         print("Under the Slave section of the config")
         return
-    k = collect_k(botcount)
+    k = collect_k(botcount, online_bots)
     a=[]
     for bots in range(botcount):
         a.append("")
-    print(len(a))
     for orig_num in raw_bin_nums:
         splitList =shamir.splitSecret(orig_num, botcount,int(k))
-        print(splitList)
         count = 0
         for nums in splitList:
             a[count] = a[count] + ","+ str(nums[1])        
             count+=1
-    print("bots:  " + str(online_bots))
-    master.share_secret(username,a,online_bots)
+    master.share_file(file_path,a,online_bots)
 
 
-def retrieve_secret(username, the_master):
-    print("go get it son")
+def get_file(username, the_master):
     (botcount, online_bots) = the_master.check_bot_prescence()
-    print the_master.retrieve_secret(username, botcount, online_bots)
+    the_master.get_file(username, botcount, online_bots)
 
 def init():
     jidparams={'jid': master_jid, 'password': master_pass}
@@ -96,17 +93,16 @@ def process_command(command):
             print_command_help(sys.argv[2])
         else:
             print_help()
-    elif command == 'sharesecret':
-        if (len(sys.argv) == 4):
+    elif command == 'sharefile':
+        if (len(sys.argv) == 3):
             master = init()
-            print(sys.argv[1])
-            share_secret(sys.argv[2], sys.argv[3], master)
+            share_file(sys.argv[2], master)
         else:
             print_help()
-    elif command == 'retrievesecret':
+    elif command == 'getfile':
         if (len(sys.argv)==3):
             master = init()
-            retrieve_secret(sys.argv[2], master)
+            get_file(sys.argv[2], master)
         else:
             print_help()
     else:

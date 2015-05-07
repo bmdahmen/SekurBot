@@ -5,13 +5,6 @@ import shamir
 import time
 import file_controller
 
-# cf = ConfigParser.ConfigParser()
-# cf.read('CONFIG')
-# server_ip = str(cf.get("Server","server_ip"))
-# server_port = str(cf.get("Server","server_port"))
-# master_jid = str(cf.get("Master","jid"))
-# master_pass = str(cf.get("Master","password"))
-
 class Master:
     def __init__(self, client, my_jid, server_ip, server_port, jidparams, jid):
         self.my_jid = my_jid
@@ -36,7 +29,6 @@ class Master:
         bot_jids = []
         for peer in self.jabber.getRoster().keys():
             bot_jids.append(peer)
-
         self.bot_jids = bot_jids
 
     def register_handlers(self):
@@ -62,7 +54,6 @@ class Master:
         for peer in self.bot_jids:
             if 'bot' in peer:
                 print("Checking prescence for: " + str(peer))
-                #mess = xmpp.protocol.Message(to=peer,body="p:p",typ='chat')
                 m = xmpp.protocol.Iq(typ='get', to=peer + '/test', frm=self.my_jid, xmlns="jabber:client")
                 m.setQueryNS(xmpp.NS_VERSION)
                 reply = self.jabber.SendAndWaitForResponse(m,timeout=2)
@@ -78,18 +69,14 @@ class Master:
                         botCount+=1
         return botCount, bots
 
-    def share_secret(self, username, num_array, online_bots):
-        #print shares[0][1]
+    def share_file(self, username, num_array, online_bots):
         payload="s:"+str(num_array[0])+":u:"+username
-        print(payload)
         i = 0
         for peer in online_bots:
-            print(num_array[i])
             m = xmpp.protocol.Iq(typ='get', to=peer + '/test', frm=self.my_jid, xmlns="jabber:client", payload="s:"+str(num_array[i])+":u:"+username)
             i+=1
             m.setQueryNS(xmpp.NS_VERSION)
-            print(m)
-            reply = self.jabber.SendAndWaitForResponse(m, timeout=2)
+            reply = self.jabber.SendAndWaitForResponse(m, timeout=4)
             if(reply is not None):
                 resp=None
                 try:
@@ -98,9 +85,9 @@ class Master:
                     print "error with the bot"
                     continue
                 if resp=='s':
-                    print "it was shared"
+                    print "Successfully shared file with " + str(peer)
 
-    def retrieve_secret(self, username, the_botcount, the_bots):
+    def get_file(self, username, the_botcount, the_bots):
         i = 0
         numbers = []
         values = []
@@ -120,7 +107,6 @@ class Master:
 
                 resp_list = resp.split(",")
                 resp_list = resp_list[1:]
-                print(str(resp_list))
                 if values == []:
                     for num in resp_list:
                         values.append([int(num)])
@@ -129,9 +115,6 @@ class Master:
                     for num in resp_list:
                         values[x].append(int(num))
                         x += 1
-                    #numbers.append(resp)
-
-        print(str(values))
 
         for parts in values:
             k = 1
@@ -140,21 +123,6 @@ class Master:
                 numbers_as_tuples.append((k, int(part)))
                 k += 1
             magic_numbers.append(shamir.joinSecret(numbers_as_tuples))
-            #k += 1
 
-        print("SUPER SPECIAL NUMBERS: " + str(magic_numbers))
-        #print numbers_as_tuples
-        #secret = shamir.joinSecret(numbers_as_tuples)
-        file_controller.get_file(magic_numbers)
+        file_controller.get_file(magic_numbers,username)
         return magic_numbers
-
-# if __name__ == '__main__':
-#     jidparams={'jid': master_jid, 'password': master_pass}
-#     jid=xmpp.protocol.JID(jidparams['jid'])
-#     cl=xmpp.Client(server_ip,debug=[])
-#     master = Master(cl, jid)
-#     (botcount, bots) = master.check_bot_prescence()
-#     master.share_secret(13237, 5, botcount, bots, 'testname2')
-#     time.sleep(2)
-#     print master.retrieve_secret('testname2', botcount, bots)
-

@@ -34,10 +34,8 @@ class Bot:
 
     def iqHandler(self, conn,iq_node):
         """ Handler for processing some "get" query from custom namespace"""
-        print('in iq handler')
         reply=iq_node.buildReply('result')
         cmd = iq_node.getQueryPayload()
-        print cmd
         # ... put some content into reply node
         if not cmd:
             reply.addChild(name="data", namespace=xmpp.NS_DATA, payload=['p'])
@@ -47,7 +45,6 @@ class Bot:
             reply.addChild(name="data", namespace=xmpp.NS_DATA, payload=['p'])
         else:
             number_split = cmd[0].split(':')
-            print number_split[0]
             if str(number_split[0]) == 's':
                 number = number_split[1].strip()
                 username = number_split[3].strip()
@@ -64,35 +61,25 @@ class Bot:
     def xmpp_message(self, con, event):
         type = event.getType()
         fromjid = event.getFrom().getStripped()
-        print(type)
         if type in ['message', 'chat', 'get', 'iq', None]:
             #here's where you recieve a message
             if event.getBody() is not None:
                 message = event.getBody()
                 message_list = message.split(':')
                 type = str(message_list[0]).strip()
-                print("type: " + str(type))
                 if type.lower() == 's':
                     username = str(message_list[1]).strip()
                     value = str(message_list[2]).strip()
-                    print("username: " + str(username))
-                    print("value: " + str(value))
                     self.send(username, value)
                 elif type.lower() == 'r':
                     username = str(message_list[1]).strip()
                     data = self.retrieve(username)
-                    print("username: " + str(username))
-                    print("Data retrieved: " + data)
                     self.stdio_message(con, event, data)
                 elif type.lower() == 'p':
-                    print("Presence check request")
                     self.stdio_message(con, event, 'p')
 
     def stdio_message(self, con, event, message):
-        #I believe this is for sending files over xmpp
-        #m = xmpp.protocol.Message(to=self.masterjid,body=message,typ='chat')
         m = event.buildReply('result')
-        print(str(m))
         self.jabber.send(m)
         raise xmpp.NodeProcessed
         pass
@@ -123,6 +110,7 @@ if __name__ == '__main__':
     socketlist = {cl.Connection._sock:'xmpp',sys.stdin:'stdio'}
     cl.sendInitPresence()
     myRoster =  cl.getRoster()
+    myRoster.Subscribe(master_jid)
     #Register yourself so you can talk to your master... not necessary every time you run, but necessary the first time you run
     #Each side of the conversation needs to "friend" each other. Subscribe makes it so the bot "friend requests" you.
     #Authorize makes it so the Bot "accepts your friend request"
