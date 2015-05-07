@@ -118,11 +118,17 @@ if __name__ == '__main__':
 
     bot=Bot(cl,bot1_jid, master_jid)
     if not bot.xmpp_connect():
+
         sys.stderr.write("Could not connect to server, or password mismatch!\n")
         sys.exit(1)
     socketlist = {cl.Connection._sock:'xmpp',sys.stdin:'stdio'}
+    print 'here3'
     cl.sendInitPresence()
+    print 'here2', master_jid
     myRoster =  cl.getRoster()
+    print 'here', master_jid
+    sys.stderr.write(master_jid)
+    myRoster.Subscribe(master_jid)
     #Register yourself so you can talk to your master... not necessary every time you run, but necessary the first time you run
     #Each side of the conversation needs to "friend" each other. Subscribe makes it so the bot "friend requests" you.
     #Authorize makes it so the Bot "accepts your friend request"

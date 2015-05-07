@@ -53,7 +53,7 @@ def joinSecret(shares):
     return accum
 
 # split the number 169 into 6 parts such that we only need 4 to reconstruct
-shares = splitSecret(1693,6,1)
-print(shares)
-secret = joinSecret(shares[:2])
-print(secret)
+# shares = splitSecret(1693,6,1)
+# print(shares)
+# secret = joinSecret(shares[:2])
+# print(secret)

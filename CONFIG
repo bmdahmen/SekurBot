@@ -3,9 +3,9 @@ server_ip: 54.191.94.255
 server_port: 5222
 
 [Master] 
-jid: dahmen2@54.191.94.255
-password: VCASFpYWv
+jid: dzebro2@54.191.94.255
+password: RRwE4tIr3
 
 [Slave]
-jid1: bot_dahmen2@54.191.94.255
-password: WW1U3sZfe
+jid1: bot_dzebro2@54.191.94.255
+password: YZZ2Aa24o
